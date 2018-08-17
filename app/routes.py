@@ -1,15 +1,16 @@
 from app import application
-from flask import render_template, flash, redirect, request
+from flask import render_template, flash, redirect, request, url_for
 from werkzeug.urls import url_parse
 from app.forms import LoginForm
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User
+from app.models import User, Post
 
 @application.route('/')
 @application.route('/index')
 # @login_required passes `next` query string arg (/login?next=/{'an endpoint'})
 @login_required
 def index():
+    posts = Post.query.all()
     return render_template('index.html', title='Home', posts=posts);
 
 @application.route('/GET', methods=['GET'])
@@ -24,8 +25,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         # For debugging
-        flash('Login requested for user {}, remember_me={}'.format(
-            form.username.data, form.remember_me.data))
+        # flash('Login requested for user {}, remember_me={}'.format(form.username.data, form.remember_me.data))
         # Log a user in
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_pw(form.password.data):
@@ -33,7 +33,7 @@ def login():
             return redirect(url_for('login'))
         # Register the user as logged in (persist throughout session)
         login_user(user, remember=form.remember_me.data)
-        # requests.args attribute exposes the contents of the query string from @login_required decorator
+        # request.args attribute exposes the contents of the query string from @login_required decorator
         next_page = request.args.get('next')
         # if URL includes a `next` arg that is set to a full URL, redirect to the index page
         if not next_page or url_parse(next_page).netloc != '':
