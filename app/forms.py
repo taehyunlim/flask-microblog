@@ -13,7 +13,7 @@ class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     pw = PasswordField('Password', validators=[DataRequired()])
-    pw2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('pw')])
+    pw2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('pw', message="Password did not match.")])
     submit = SubmitField('Register')
 
     def validate_username(self, username):
@@ -25,4 +25,3 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError('Please use a different email.')
-        
