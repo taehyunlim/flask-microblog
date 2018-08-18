@@ -22,7 +22,7 @@ class User(UserMixin, db.Model):
 
     def avatar(self, size):
         # Encode email string as bytes and then store the hexadecimal digest string
-        digest = md(self.email.lower().encode('utf-8')).hexdigest()
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
 
 class Post(db.Model):
