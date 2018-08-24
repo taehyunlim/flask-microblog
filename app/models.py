@@ -26,7 +26,7 @@ class User(UserMixin, db.Model):
         'User', # Self-referential
         secondary=followers, # Association table defined above
         primaryjoin=(followers.c.follower_id == id), # How left-side entity is linked: User's `id` matches the `follower_id` field of the association table
-        secondaryjoin=(followers.c.followed_id == id), # How the right-side entity (follwed user) is linked.
+        secondaryjoin=(followers.c.followed_id == id), # How the right-side entity (followed user) is linked.
         backref=db.backref('followers', lazy='dynamic'), # How this relationship will be accessed from the right-side entity (followed)
         lazy='dynamic' # `dynamic` sets up the query to not run until specifically requested
     )
@@ -55,12 +55,14 @@ class User(UserMixin, db.Model):
 
     def is_following(self, user):
         return self.followed.filter(
-            followers.c.follwed_id == user.id).count() > 0
+            followers.c.followed_id == user.id).count() > 0
 
     def followed_posts(self):
-        return Post.query.join(followers, (followers.c.followed_id == Post.user_id))
-            .filter(followers.c.follower_id == self.id or Post.user_id == self.id )
-            .order_by(Post.timestamp.desc())
+        followed = Post.query.join(
+            followers, (followers.c.followed_id == Post.user_id)).filter(
+                followers.c.follower_id == self.id)
+        own = Post.query.filter_by(user_id=self.id)
+        return followed.union(own).order_by(Post.timestamp.desc())
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
