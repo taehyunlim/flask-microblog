@@ -26,7 +26,7 @@ def index():
         flash('Posted successfully.')
         return redirect(url_for('index'))
 
-    posts = Post.query.all()
+    posts = current_user.followed_posts().all()
     return render_template('index.html', title='Home', form=form, posts=posts)
 
 @application.route('/GET', methods=['GET'])
