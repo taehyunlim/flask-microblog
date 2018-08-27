@@ -18,6 +18,7 @@ def before_request():
 # @login_required passes `next` query string arg (/login?next=/{'an endpoint'})
 @login_required
 def index():
+    page = request.args.get('page', 1, type=int)
     form = PostForm()
     if form.validate_on_submit():
         post = Post(body=form.post.data, author=current_user)
@@ -26,8 +27,9 @@ def index():
         flash('Posted successfully.')
         return redirect(url_for('index'))
 
-    posts = current_user.followed_posts().all()
-    return render_template('index.html', title='Home', form=form, posts=posts)
+    posts = current_user.followed_posts().paginate(
+        page, application.config['POSTS_PER_PAGE'], False)
+    return render_template('index.html', title='Home', form=form, posts=posts.items)
 
 @application.route('/GET', methods=['GET'])
 def test():
@@ -137,5 +139,7 @@ def unfollow(username):
 @application.route('/explore')
 @login_required
 def explore():
-    posts = Post.query.order_by(Post.timestamp.desc()).all()
-    return render_template('index.html', title='Explore', posts=posts)
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, application.config['POSTS_PER_PAGE'], False)
+    return render_template('index.html', title='Explore', posts=posts.items)
