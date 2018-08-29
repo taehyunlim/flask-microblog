@@ -37,6 +37,7 @@ pip-delete-this-directory.txt
 instance/
 .webassets-cache
 .cache
+.flaskenv
 
 # Environments
 .env
@@ -46,6 +47,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
 
 # Error logs & others
 /logs

@@ -1,0 +1,2 @@
+username: {{ user.username }}
+reset_pw_link: {{ url_for('reset_pw', token=token, _external=True) }}
