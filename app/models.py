@@ -73,7 +73,7 @@ class User(UserMixin, db.Model):
     @staticmethod
     def verify_reset_pw_token(token):
         try:
-            id = jwt.decode(token, application.config['SECRET_KEY'], algorithm['HS256'])['reset_pw']
+            id = jwt.decode(token, application.config['SECRET_KEY'], algorithms=['HS256'])['reset_pw']
         except:
             return
         return User.query.get(id)
