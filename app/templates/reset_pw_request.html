@@ -1,8 +1,14 @@
 {% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
 
-{% block content %}
-  <h1>Reset password</h1>
-  <form action="" method="post">
+{% block app_content %}
+  <h3>Reset password</h3>
+  <div class="row">
+    <div class="col-sm-3">
+      {{ wtf.quick_form(form) }}
+    </div>
+  </div>
+  <!-- <form action="" method="post">
     {{ form.hidden_tag() }}
     <p>
       {{ form.email.label }}<br>
@@ -12,5 +18,5 @@
       {% endfor %}
     </p>
     <p>{{ form.submit() }}</p>
-  </form>
+  </form> -->
 {% endblock %}
