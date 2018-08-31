@@ -1,12 +1,12 @@
 from app import application, db
-from flask import render_template, flash, redirect, request, url_for
+from flask import render_template, flash, redirect, request, url_for, g
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Post
 from datetime import datetime
 from app.email import send_pw_reset_email
-from flask_babel import _
+from flask_babel import _, get_locale
 
 @application.before_request
 def before_request():
@@ -14,6 +14,8 @@ def before_request():
         # Upon referencing `current_user` Flask-Login will invoke the user loader callback function, which will run a database query that will put the target user in the database session
         current_user.datetime_last_seen = datetime.utcnow()
         db.session.commit()
+    # Store selected language in flask.g (global object) to access from the base template
+    g.locale = str(get_locale())
 
 @application.route('/', methods=['GET', 'POST'])
 @application.route('/index', methods=['GET', 'POST'])

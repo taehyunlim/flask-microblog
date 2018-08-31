@@ -55,5 +55,5 @@ if not application.debug:
 
 @babel.localeselector
 def get_locale():
-    return request.accept_languages.best_match(application.config['LANGUAGES'])
-    # return 'ko_KR'
+    # return request.accept_languages.best_match(application.config['LANGUAGES'])
+    return 'ko_KR'
