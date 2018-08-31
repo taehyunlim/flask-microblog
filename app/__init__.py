@@ -1,5 +1,5 @@
 import logging, os
-from flask import Flask
+from flask import Flask, request
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -8,6 +8,7 @@ from flask_mail import Mail
 from logging.handlers import SMTPHandler, RotatingFileHandler
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
+from flask_babel import Babel
 
 application = Flask(__name__)
 application.config.from_object(Config)
@@ -18,6 +19,7 @@ login.login_view = 'login'
 mail = Mail(application)
 bootstrap = Bootstrap(application)
 moment = Moment(application)
+babel = Babel(application)
 
 from app import routes, models, errors
 
@@ -50,3 +52,8 @@ if not application.debug:
     # Logging categories: DEBUG, INFO, WARNING, ERROR and CRITICAL
     application.logger.setLevel(logging.INFO)
     application.logger.info('Microblog startup')
+
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(application.config['LANGUAGES'])
+    # return 'ko_KR'

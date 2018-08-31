@@ -17,3 +17,5 @@ class Config(object):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['taehyun.lim@gmail.com']
+    # Babel: Supported languages
+    LANGUAGES = ['en_US', 'ko_KR']

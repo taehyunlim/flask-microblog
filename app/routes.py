@@ -6,6 +6,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Post
 from datetime import datetime
 from app.email import send_pw_reset_email
+from flask_babel import _
 
 @application.before_request
 def before_request():
@@ -53,7 +54,7 @@ def login():
         # Log a user in
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_pw(form.password.data):
-            flash('Invalid username or password')
+            flash(_('Invalid username or password'))
             return redirect(url_for('login'))
         # Register the user as logged in (persist throughout session)
         login_user(user, remember=form.remember_me.data)

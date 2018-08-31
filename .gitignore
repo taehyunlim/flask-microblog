@@ -48,6 +48,10 @@ ENV/
 env.bak/
 venv.bak/
 
+# Babel test
+test.pot
+
+
 
 # Error logs & others
 /logs
