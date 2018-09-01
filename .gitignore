@@ -49,9 +49,8 @@ env.bak/
 venv.bak/
 
 # Babel test
-test.pot
-
-
+test.p
+*.pot
 
 # Error logs & others
 /logs

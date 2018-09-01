@@ -1,4 +1,4 @@
-from app import application, db
+from app import application, db, cli
 from app.models import User, Post
 
 # 'flask shell'
