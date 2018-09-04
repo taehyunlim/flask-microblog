@@ -7,6 +7,7 @@ from app.models import User, Post
 from datetime import datetime
 from app.email import send_pw_reset_email
 from flask_babel import _, get_locale
+from guess_language import guess_language
 
 @application.before_request
 def before_request():
@@ -26,7 +27,12 @@ def index():
     page = request.args.get('page', 1, type=int)
     form = PostForm()
     if form.validate_on_submit():
-        post = Post(body=form.post.data, author=current_user)
+        # Add language detection
+        guess_lang = guess_language(form.post.data)
+        if guess_lang == 'UNKNOWN' or len(guess_lang) > 5:
+            guess_lang = ''
+        # Write the post to db
+        post = Post(body=form.post.data, author=current_user, language=guess_lang)
         db.session.add(post)
         db.session.commit()
         flash('Posted successfully.')

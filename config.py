@@ -19,3 +19,5 @@ class Config(object):
     ADMINS = ['taehyun.lim@gmail.com']
     # Babel: Supported languages
     LANGUAGES = ['en_US', 'ko_KR']
+    # MS Translator API key
+    MS_TRANSLATOR_KEY = os.environ.get('MS_TRANSLATOR_KEY')
