@@ -55,4 +55,18 @@
   {{ super() }}
   {{ moment.include_moment() }}
   {{ moment.lang(g.locale) }}
+  <script>
+    function translate(sourceElem, destElem, sourceLang, destLang) {
+      $(destElem).html('<p>loading</p>');
+      $.post('/translate', {
+        text: $(sourceElem).text(),
+        source_lang: sourceLang,
+        dest_lang: destLang
+      }).done((res) => {
+        $(destElem).text(res['text'])
+      }).fail(() => {
+        $(destElem).text("{{ _('Error: Could not contact server.') }}");
+      });
+    }
+  </script>
 {% endblock %}
