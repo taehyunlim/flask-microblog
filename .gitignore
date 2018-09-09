@@ -55,3 +55,4 @@ test.p
 # Error logs & others
 /logs
 __commands
+.DS_Store
