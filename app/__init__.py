@@ -21,7 +21,11 @@ bootstrap = Bootstrap(application)
 moment = Moment(application)
 babel = Babel(application)
 
-from app import routes, models, errors
+# Register the errors blueprint to the application
+from app.errors import bp as errors_bp
+application.register_blueprint(errors_bp)
+
+from app import routes, models
 
 # Add SMTPHandler instace to the logger object to log errors by email
 if not application.debug:
