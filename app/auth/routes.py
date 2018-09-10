@@ -1,4 +1,4 @@
-from app import application, db
+from app import db
 from app.auth import bp
 from app.auth.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.auth.email import send_pw_reset_email
