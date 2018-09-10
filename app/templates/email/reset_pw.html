@@ -1,3 +1,3 @@
 <p>{{ user.username }}</p>
 <!-- _external=True will generate the complete URL respective of the domain name of deployed application -->
-<a href="{{ url_for('reset_pw', token=token, _external=True) }}">reset_pw_link</a>
+<a href="{{ url_for('auth.reset_pw', token=token, _external=True) }}">reset_pw_link</a>
