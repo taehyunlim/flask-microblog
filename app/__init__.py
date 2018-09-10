@@ -25,6 +25,10 @@ babel = Babel(application)
 from app.errors import bp as errors_bp
 application.register_blueprint(errors_bp)
 
+# Register the auth blueprint to the application
+from app.auth import bp as auth_bp
+application.register_blueprint(auth_bp, url_prefix='/auth')
+
 from app import routes, models
 
 # Add SMTPHandler instace to the logger object to log errors by email
