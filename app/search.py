@@ -26,3 +26,25 @@ def query_index(index, query, page, per_page):
         })
     ids = [int(hit['_id']) for hit in search['hits']['hits']] # List comprehension (python)
     return ids, search['hits']['total']
+
+##### Python console example #####
+# >>> es.search(index='my_index', doc_type='my_index',
+# ... body={'query': {'match': {'text': 'second'}}})
+# {
+#     'took': 1,
+#     'timed_out': False,
+#     '_shards': {'total': 5, 'successful': 5, 'skipped': 0, 'failed': 0},
+#     'hits': {
+#         'total': 1,
+#         'max_score': 0.25316024,
+#         'hits': [
+#             {
+#                 '_index': 'my_index',
+#                 '_type': 'my_index',
+#                 '_id': '2',
+#                 '_score': 0.25316024,
+#                 '_source': {'text': 'a second test'}
+#             }
+#         ]
+#     }
+# }

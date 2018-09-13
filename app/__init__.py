@@ -9,6 +9,7 @@ from logging.handlers import SMTPHandler, RotatingFileHandler
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_babel import Babel, lazy_gettext as _l
+from elasticsearch import Elasticsearch
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -36,7 +37,6 @@ def create_app(config_class=Config):
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
 
-
     # Register the auth blueprint to the app
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -44,6 +44,9 @@ def create_app(config_class=Config):
     # Register the main blueprint to the app
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
+
+    # Elasticsearch instance
+    app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 
     if not app.debug and not app.testing:
         # Only enable email logger if the email server configs info exists
@@ -73,9 +76,6 @@ def create_app(config_class=Config):
         # Logging categories: DEBUG, INFO, WARNING, ERROR and CRITICAL
         app.logger.setLevel(logging.INFO)
         app.logger.info('Microblog startup')
-
-        # Elasticsearch instance
-        app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 
     return app
 
