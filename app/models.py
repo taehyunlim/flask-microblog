@@ -1,9 +1,11 @@
 from datetime import datetime
 from time import time
-from app import db, login, application
+from app import db, login
+from flask import current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from hashlib import md5
+from app.search import add_to_index, remove_from_index, query_index
 import jwt
 
 # Create an association table for followers
@@ -68,17 +70,68 @@ class User(UserMixin, db.Model):
 
     def get_reset_pw_token(self, expires_in=600):
         return jwt.encode(
-            {'reset_pw': self.id, 'exp': time() + expires_in}, application.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+            {'reset_pw': self.id, 'exp': time() + expires_in}, current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
     @staticmethod
     def verify_reset_pw_token(token):
         try:
-            id = jwt.decode(token, application.config['SECRET_KEY'], algorithms=['HS256'])['reset_pw']
+            id = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])['reset_pw']
         except:
             return
         return User.query.get(id)
 
-class Post(db.Model):
+class SearchableMixin(object):
+    # Methods receive a class and not an instance as its first arg
+    # More on classmethods: https://goo.gl/vGDMsv
+    @classmethod
+    def search(cls, expression, page, per_page):
+        ids, total = query_index(cls.__tablename__, expression, page, per_page)
+        if total == 0:
+            # No results found, return 0
+            return cls.query.filter_by(id=0), 0
+        when = []
+        # Fabricating `when` statement for the query
+        for i in range(len(ids)):
+            when.append((ids[i], i))
+        # when = [({ '_index': '', '_id': '', '_score': ''}, 1), ({ } ,2), ...]
+        # order_by/case syntax: https://goo.gl/t8mwSR
+        return cls.query.filter(cls.id.in_(ids)).order_by(
+            db.case(when, value=cls.id)), total
+
+    @classmethod
+    def before_commit(cls, session):
+        # Create a session._changes dictionary to save the objects throughout the session, until ES index is updated
+        session._changes = {
+            'add': list(session.new),
+            'update': list(session.dirty),
+            'delete': list(session.deleted)
+        }
+
+    @classmethod
+    def after_commit(cls, session):
+        for obj in session._changes['add']:
+            # Q: Why use isinstance?
+            if isinstance(obj, SearchableMixin):
+                add_to_index(obj.__tablename__, obj)
+        for obj in session._changes['update']:
+            if isinstance(obj, SearchableMixin):
+                add_to_index(obj.__tablename__, obj)
+        for obj in session._changes['delete']:
+            if isinstance(obj, SearchableMixin):
+                remove_from_index(obj.__tablename__, obj)
+        # Clear session changes
+        session._changes = None
+
+    @classmethod
+    def reindex(cls):
+        for obj in cls.query:
+            add_to_index(cls.__tablename__, obj)
+
+db.event.listen(db.session, 'before_commit', SearchableMixin.before_commit)
+db.event.listen(db.session, 'after_commit', SearchableMixin.after_commit)
+
+class Post(SearchableMixin, db.Model):
+    __searchable__ = ['body']
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
