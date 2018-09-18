@@ -75,5 +75,47 @@
         $(destElem).text("{{ _('Error: Could not contact server.') }}");
       });
     }
+    // Registering a function to the base html using jquery
+    $(function() {
+      let timer = null; // Timer object is accessible across 2 hover events: cursor-in/out
+      let xhr = null; //XMLHttpRequest
+      $('.user_modal').hover(
+        (e) => {
+          // Cursor-in event hanlder
+          let elem = $(e.currentTarget);
+          timer = setTimeout(() => {
+            timer = null;
+            xhr = $.ajax('/user/' + elem.first().text().trim() + '/modal').done((res) => {
+              xhr = null
+              // Create and display modal here
+              elem.popover({
+                trigger: 'manual',
+                html: true,
+                animation: true,
+                container: elem,
+                content: res
+              }).popover('show');
+              flask_moment_render_all();
+            });
+
+          }, 300)
+        },
+        (e) => {
+          // Cursor-out event handler
+          let elem = $(e.currentTarget);
+          if (timer) {
+            clearTimeout(timer);
+            timer = null;
+          }
+          else if (xhr) {
+            xhr.abort();
+            xhr = null;
+          } else {
+            // Get rid of popup here
+            elem.popover('destroy');
+          }
+        }
+      )
+    });
   </script>
 {% endblock %}
