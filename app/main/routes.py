@@ -1,5 +1,5 @@
 from app import db
-from flask import render_template, flash, redirect, request, url_for, g, jsonify, current_app
+from flask import render_template, flash, redirect, request, url_for, g, jsonify, current_app, session
 from werkzeug.urls import url_parse
 from app.main.forms import EditProfileForm, PostForm
 from flask_login import current_user, login_user, logout_user, login_required
@@ -50,6 +50,25 @@ def index():
     next_url = url_for('main.index', page=posts.next_num) if posts.has_next else None
     prev_url = url_for('main.index', page=posts.prev_num) if posts.has_prev else None
     return render_template('index.html', title='Home', form=form, posts=posts.items, next_url=next_url, prev_url=prev_url)
+
+@bp.route('/posts/<id>/delete')
+@login_required
+def delete(id):
+    post = Post.query.filter_by(id=id).first()
+    if post and post.author == current_user:
+        db.session.delete(post)
+        db.session.commit()
+        flash('Post was deleted.')
+        return redirect(request.referrer)
+    return redirect(url_for('main.index'))
+
+@bp.route('/posts/<id>/view', methods=['GET'])
+@login_required
+def view(id):
+    post = Post.query.filter_by(id=id).first()
+    if post:
+        return render_template('index.html', title='Home', posts=[post])
+    return redirect(url_for('main.index'))
 
 @bp.route('/GET', methods=['GET'])
 def test():

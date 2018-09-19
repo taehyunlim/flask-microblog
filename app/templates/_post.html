@@ -18,11 +18,12 @@
       {% if post.language and post.language != g.locale %}
       <br><br>
       <span id="translation_{{ post.id }}">
-        <a href="javascript:translate('#post_{{ post.id }}', '#translation_{{ post.id }}', '{{ post.language }}', '{{ g.locale }}');
-        " style="font-size: 12px;">{{ _('Translate') }}</a>
-        <a href="javascript:console.log('#post_{{ post.id }}', '#translation_{{ post.id }}', '{{ post.language }}', '{{ g.locale }}');
-        " style="font-size: 12px;">{{ _('Translate (Debug)') }}</a>
+        <a href="javascript:translate('#post_{{ post.id }}', '#translation_{{ post.id }}', '{{ post.language }}', '{{ g.locale }}');" style="font-size: 12px;">{{ _('Translate') }}</a>
+        <!-- <a href="javascript:console.log('#post_{{ post.id }}', '#translation_{{ post.id }}', '{{ post.language }}', '{{ g.locale }}');" style="font-size: 12px;">{{ _('Translate (Debug)') }}</a> -->
       </span>
+      {% endif %}
+      {% if post.author == current_user %}
+      <span><a href="{{ url_for('main.delete', id=post.id) }}" style="font-size: 12px;">Delete Post #{{ post.id }}</a></span>
       {% endif %}
     </td>
   </tr>
