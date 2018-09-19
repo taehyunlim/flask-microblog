@@ -22,6 +22,10 @@ class User(UserMixin, db.Model):
     about_me = db.Column(db.String(140))
     datetime_joined = db.Column(db.DateTime, default=datetime.utcnow)
     datetime_last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    # Private messages support
+    messages_sent = db.relationship('Message', foreign_keys='Message.sender_id', backref='author', lazy='dynamic')
+    messages_received = db.relationship('Message', foreign_keys='Message.recipient_id', backref='recipient', lazy='dynamic')
+    last_message_read_time = db.Column(db.DateTime)
 
     # Posts: One-to-Many relationship
     posts = db.relationship('Post', backref='author', lazy='dynamic')
@@ -79,6 +83,10 @@ class User(UserMixin, db.Model):
         except:
             return
         return User.query.get(id)
+
+    def new_messages(self):
+        last_read_time = self.last_message_read_time or datetime(1900,1,1)
+        return Message.query.filter_by(recipient=self).filter(Message.timestamp > last_read_time).count()
 
 class SearchableMixin(object):
     # Methods receive a class and not an instance as its first arg
@@ -146,3 +154,23 @@ class Post(SearchableMixin, db.Model):
 def load_user(id):
     # Flask-Login passes a string, needs to convert to int
     return User.query.get(int(id))
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    body = db.Column(db.String(140))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<Message {}>'.format(self.body)
+
+# class Comment(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+#     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+#     body = db.Column(db.String(140))
+#     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+#
+#     def __repr__(self):
+#         return '<Comment {}>'.format(self.body)
